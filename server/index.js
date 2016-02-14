@@ -174,8 +174,8 @@ api.get('/torrents/:infoHash/subtitle', findTorrent, function (req, res) {
 });
 
 api.get('/torrents/:infoHash/play/:path([^"]+)', findTorrent, function(req, res){
-  var path = req.params.path
-  var data = { "subtitle":  "/torrents/"+req.params.infoHash+"/subtitle", "url": "/torrents/"+req.params.infoHash+"/files/"+path };
+  var path = req.params.path;
+  var data = { 'subtitle':  '/torrents/'+req.params.infoHash+'/subtitle', 'url': '/torrents/'+req.params.infoHash+'/files/'+path };
   var result = template(data);
 
   res.set('Content-Type', 'text/html');
