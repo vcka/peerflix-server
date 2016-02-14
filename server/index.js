@@ -9,7 +9,7 @@ var rangeParser = require('range-parser'),
   store = require('./store'),
   progress = require('./progressbar'),
   stats = require('./stats'),
-  Handlebars = require('Handlebars'),
+  Handlebars = require('handlebars'),
   api = express();
 
 api.use(express.json());
