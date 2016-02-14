@@ -50,15 +50,20 @@
         <div ng-class-even="'space'" ng-class-odd="'progress-bar progress-bar-success'"
              ng-repeat="progress in torrent.progress track by $index" ng-style="{ width: progress + '%' }"></div>
       </div>
-      <ul class="list-group">
-        <li class="list-group-item" ng-repeat="file in torrent.files">
-          <input type="checkbox" ng-model="file.selected" ng-click="select(torrent, file)"/>
-          <span class="fa fa-cloud-download"></span>
-          <a ng-href="{{ file.link }}" target="_blank">
-            {{ file.name }} ({{ file.length / 1024 / 1024 | number:1 }} MB)
-          </a>
-        </li>
-      </ul>
+      <div>
+        <ul class="list-group">
+          <li class="list-group-item" ng-repeat="file in torrent.files">
+            <input type="checkbox" ng-model="file.selected" ng-click="select(torrent, file)"/>
+            <span class="fa fa-cloud-download"></span>
+            <a ng-href="{{ file.link }}" target="_blank">
+              {{ file.name }} ({{ file.length / 1024 / 1024 | number:1 }} MB)
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div style="margin-top: 5px">
+        <button type="button" class="btn btn-default" ng-file-select ng-file-change="subtitle(torrent, $files)">Add Subtitle</button>
+      </div>
     </div>
     <div class="panel-footer">
       <ul class="list-unstyled list-inline">

@@ -75,6 +75,19 @@ angular.module('peerflixServerApp')
       _.remove($scope.torrents, torrent);
     };
 
+    $scope.subtitle = function (torrent, files) {
+      if (files && files.length) {
+        files.forEach(function (file) {
+          $upload.upload({
+            url: '/torrents/'+torrent.infoHash+'/subtitle',
+            file: file
+          }).then(function (response) {
+            console.log(response.data);
+          });
+        });
+      }
+    };
+
     torrentSocket.on('verifying', function (hash) {
       findTorrent(hash).then(function (torrent) {
         torrent.ready = false;

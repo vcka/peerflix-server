@@ -9,6 +9,7 @@ var rangeParser = require('range-parser'),
   store = require('./store'),
   progress = require('./progressbar'),
   stats = require('./stats'),
+  Handlebars = require('Handlebars'),
   api = express();
 
 api.use(express.json());
@@ -19,6 +20,12 @@ api.use(function (req, res, next) {
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
+
+var source = '<video controls="" autoplay="" name="media"><source src="{{url}}" type="video/mp4">'+
+              '<track label="English" kind="subtitles" srclang="en" src="{{subtitle}}" default>' +
+              '<button id="subtitles" type="button" data-state="subtitles">CC</button>' +
+              '</video>';
+var template = Handlebars.compile(source);
 
 function serialize(torrent) {
   if (!torrent.torrent) {
@@ -39,7 +46,7 @@ function serialize(torrent) {
       return {
         name: f.name,
         path: f.path,
-        link: '/torrents/' + torrent.infoHash + '/files/' + encodeURIComponent(f.path),
+        link: '/torrents/' + torrent.infoHash + '/play/' + encodeURIComponent(f.path),
         length: f.length,
         offset: f.offset,
         selected: torrent.selection.some(function (s) {
@@ -144,6 +151,35 @@ api.get('/torrents/:infoHash/files', findTorrent, function (req, res) {
       return '#EXTINF:-1,' + f.path + '\n' +
         req.protocol + '://' + req.get('host') + '/torrents/' + torrent.infoHash + '/files/' + encodeURIComponent(f.path);
     }).join('\n'));
+});
+
+api.post('/torrents/:infoHash/subtitle', multipart(), findTorrent, function (req, res) {
+  var file = req.files && req.files.file;
+  if (!file) {
+    return res.send(500, 'file is missing');
+  }
+  req.torrent.subtitle = file.path;
+  res.send({ subtitle: file });
+});
+
+api.get('/torrents/:infoHash/subtitle', findTorrent, function (req, res) {
+  var torrent = req.torrent;
+
+  res.statusCode = 200;
+
+  if (req.method === 'HEAD') {
+    return res.end();
+  }
+  pump(fs.createReadStream(torrent.subtitle), res);
+});
+
+api.get('/torrents/:infoHash/play/:path([^"]+)', findTorrent, function(req, res){
+  var path = req.params.path
+  var data = { "subtitle":  "/torrents/"+req.params.infoHash+"/subtitle", "url": "/torrents/"+req.params.infoHash+"/files/"+path };
+  var result = template(data);
+
+  res.set('Content-Type', 'text/html');
+  res.send(result);
 });
 
 api.all('/torrents/:infoHash/files/:path([^"]+)', findTorrent, function (req, res) {
