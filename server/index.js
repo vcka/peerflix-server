@@ -10,6 +10,8 @@ var rangeParser = require('range-parser'),
   progress = require('./progressbar'),
   stats = require('./stats'),
   Handlebars = require('handlebars'),
+  path = require('path'),
+  captions = require('node-captions'),
   api = express();
 
 api.use(express.json());
@@ -170,7 +172,15 @@ api.get('/torrents/:infoHash/subtitle', findTorrent, function (req, res) {
   if (req.method === 'HEAD') {
     return res.end();
   }
-  pump(fs.createReadStream(torrent.subtitle), res);
+
+  if(path.extname(torrent.subtitle) === '.srt'){
+    captions.srt.read(torrent.subtitle, {}, function (err, data) {
+        if (err) { res.send(404); }
+        res.send(captions.vtt.generate(captions.srt.toJSON(data), res));
+    });
+  } else {
+    pump(fs.createReadStream(torrent.subtitle), res);
+  }
 });
 
 api.get('/torrents/:infoHash/play/:path([^"]+)', findTorrent, function(req, res){
